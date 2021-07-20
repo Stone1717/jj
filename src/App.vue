@@ -11,8 +11,13 @@
             <el-button @click="resetForm('ruleForm')">重置</el-button>
         </el-form-item>
     </el-form>
+
+
     <router-link to="/">GO TO HOME</router-link>
-    <router-view to="/login">GO TO login</router-view>
+    <router-link to="/login">GO TO login</router-link>
+    <router-view></router-view>
+
+
 </template>
 
 <script>
@@ -55,6 +60,35 @@ export default {
             },
         });
     },
+    methods:{
+        submitForm(formName){
+            this.$refs[formName].validate(valid)=>{
+                if(valid){
+                    this.$https.post('/api')
+                    .then(data=>{
+                        if(data.data.code == 200){
+                            setTimeout(() => {
+                                Cookies.set('token',data.data.token,30);
+                                this.$store.commit('settoken',data.data.token);
+                                this.$router.push({path:'/home'});
+                                this.$message('登录成功');
+                            }, 2000);
+                        }
+                    })
+                    .catch(err=>{
+                        this.$message('服务器繁忙,请重试');
+                        this.$router.push({path:'/'})
+                    })
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            }
+        },
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+        }
+    }
 };
 </script>
 
